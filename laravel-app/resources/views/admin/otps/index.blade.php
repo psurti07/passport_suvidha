@@ -52,13 +52,13 @@
                                 <label class="text-sm font-medium text-gray-700 whitespace-nowrap">From:</label>
                                 <input type="date" name="from_date"
                                     class="border border-gray-300 rounded-lg text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm w-full sm:w-40"
-                                    value="{{ request('from_date') }}">
+                                    value="{{ $from_date }}">
                             </div>
                             <div class="flex flex-row sm:flex-row items-center gap-2 space-x-2">
                                 <label class="text-sm font-medium text-gray-700 whitespace-nowrap">To:</label>
                                 <input type="date" name="to_date"
                                     class="border border-gray-300 rounded-lg text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm w-full sm:w-40"
-                                    value="{{ request('to_date') }}">
+                                    value="{{ $to_date }}">
                             </div>
                         </div>
                         {{-- Hidden inputs for sorting and pagination --}}
