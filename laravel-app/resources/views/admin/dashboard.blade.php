@@ -4,7 +4,8 @@
 <div class="space-y-8">
     <!-- Header -->
     <div class="flex justify-between items-center">
-        <h1 class="text-xl font-semibold text-primary-blue">Passport Application Statistics - {{ now()->format('d M, Y') }}</h1>
+        <h1 class="text-xl font-semibold text-primary-blue">Passport Application Statistics -
+            {{ now()->format('d M, Y') }}</h1>
     </div>
 
     <!-- Statistics Charts -->
@@ -40,22 +41,6 @@
                 <canvas id="normal60Chart"></canvas>
             </div>
         </div>
-
-        <!-- Tatkal Passport 36 Page -->
-        <!-- <div class="card p-6">
-            <h2 class="text-lg font-medium text-primary-blue mb-6">Tatkal Passport - 36 Pages</h2>
-            <div class="h-[400px]">
-                <canvas id="tatkal36Chart"></canvas>
-            </div>
-        </div> -->
-
-        <!-- Tatkal Passport 60 Page -->
-        <!-- <div class="card p-6">
-            <h2 class="text-lg font-medium text-primary-blue mb-6">Tatkal Passport - 60 Pages</h2>
-            <div class="h-[400px]">
-                <canvas id="tatkal60Chart"></canvas>
-            </div>
-        </div> -->
     </div>
 </div>
 
@@ -69,7 +54,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const accentBlue = computedStyle.getPropertyValue('--accent-blue').trim();
     const textGray = computedStyle.getPropertyValue('--text-gray').trim();
     const borderColor = computedStyle.getPropertyValue('--border-color').trim();
-    
+
     // Ensure default values if variables are not defined
     const defaultColor = '#CCCCCC'; // A neutral default color
 
@@ -87,12 +72,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     padding: 10,
                     color: textGray || defaultColor,
                     // Optional: format ticks if numbers get large
-                    // callback: function(value) {
-                    //     if (value >= 1000) {
-                    //         return (value / 1000) + 'k';
-                    //     }
-                    //     return value;
-                    // }
+                    callback: function(value) {
+                        if (value >= 1000) {
+                            return (value / 1000) + 'k';
+                        }
+                        return value;
+                    }
                 }
             },
             x: {
@@ -112,7 +97,7 @@ document.addEventListener('DOMContentLoaded', function() {
             tooltip: {
                 backgroundColor: primaryBlue || defaultColor,
                 titleColor: 'white', // Assuming white text is desired on the primary color
-                bodyColor: 'white',  // Assuming white text is desired on the primary color
+                bodyColor: 'white', // Assuming white text is desired on the primary color
                 padding: 10,
                 cornerRadius: 4,
                 displayColors: false // Hide color box in tooltip
@@ -122,84 +107,56 @@ document.addEventListener('DOMContentLoaded', function() {
         // barThickness: 30 
     };
 
-    const label1 = @json($normalcustlabel);
-    const data1 = @json($normalcustdata);
-
-    const label2 = @json($normalleadlabel);
-    const data2 = @json($normalleaddata);
-
-    const label3 = @json($normal36plabel);
-    const data3 = @json($normal36pdata);
-
-    const label4 = @json($normal60plabel);
-    const data4 = @json($normal60pdata);
-
-
-    // Normal Passport Customer Registrations Chart
-    const normalcustCtx = document.getElementById('normalCustChart').getContext('2d');
-    new Chart(normalcustCtx, {
-        type: 'bar',
-        data: {
-            labels: label1,
-            datasets: [{
-                label: 'Normal Registrations',
-                data: data1, // Example Data
-                backgroundColor: primaryBlue || defaultColor,
-                borderRadius: 4
-            }]
+    // Chart Data from Controller
+    const charts = [{
+            id: 'normalCustChart',
+            label: 'Normal Registrations',
+            labels: @json($normalcustlabel),
+            data: @json($normalcustdata)
         },
-        options: { ...commonOptions } // Spread common options
-    });
-
-    // Normal Passport Customer Leads Chart
-    const normalleadCtx = document.getElementById('normalLeadChart').getContext('2d');
-    new Chart(normalleadCtx, {
-        type: 'bar',
-        data: {
-            labels: label2,
-            datasets: [{
-                label: 'Normal Leads',
-                data: data2, // Example Data
-                backgroundColor: primaryBlue || defaultColor,
-                borderRadius: 4
-            }]
+        {
+            id: 'normalLeadChart',
+            label: 'Normal Leads',
+            labels: @json($normalleadlabel),
+            data: @json($normalleaddata)
         },
-        options: { ...commonOptions } // Spread common options
-    });
-
-    // Normal Passport 36 Page Chart
-    const normal36Ctx = document.getElementById('normal36Chart').getContext('2d');
-    new Chart(normal36Ctx, {
-        type: 'bar',
-        data: {
-            labels: label3,
-            datasets: [{
-                label: 'Normal 36p',
-                data: data3, // Example Data
-                backgroundColor: primaryBlue || defaultColor,
-                borderRadius: 4
-            }]
+        {
+            id: 'normal36Chart',
+            label: 'Normal 36p',
+            labels: @json($normal36plabel),
+            data: @json($normal36pdata)
         },
-        options: { ...commonOptions } // Spread common options
-    });
+        {
+            id: 'normal60Chart',
+            label: 'Normal 60p',
+            labels: @json($normal60plabel),
+            data: @json($normal60pdata)
+        }
+    ];
 
-    // Normal Passport 60 Page Chart
-    const normal60Ctx = document.getElementById('normal60Chart').getContext('2d');
-    new Chart(normal60Ctx, {
-        type: 'bar',
-        data: {
-            labels: label4,
-            datasets: [{
-                label: 'Normal 60p',
-                data: data4, // Example Data
-                backgroundColor: primaryBlue || defaultColor,
-                borderRadius: 4
-            }]
-        },
-        options: { ...commonOptions } 
+    // Create Charts
+    charts.forEach(chart => {
+
+        const ctx = document.getElementById(chart.id).getContext('2d');
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: chart.labels,
+                datasets: [{
+                    label: chart.label,
+                    data: chart.data,
+                    backgroundColor: primaryBlue,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                ...commonOptions
+            }
+        });
+
     });
 });
-
 </script>
 @endpush
-@endsection 
+@endsection

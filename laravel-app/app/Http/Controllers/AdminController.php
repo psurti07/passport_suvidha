@@ -23,48 +23,48 @@ class AdminController extends Controller
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
+
     public function dashboard()
     {
-        $normalcustlist = Customer::getnormalcustdata()->reverse();
-        $normalleadlist = Customer::getnormalleaddata()->reverse();
-        $normal36plist = Customer::getnormal36pdata()->reverse();
-        $normal60plist = Customer::getnormal60pdata()->reverse();
+        $charts = [
+            'normalcust' => Customer::getDashboardData('normal',1),
+            'normallead' => Customer::getDashboardData('normal',0),
+            'normal36p'  => Customer::getDashboardData(null,1,'NORMAL_36'),
+            'normal60p'  => Customer::getDashboardData(null,1,'NORMAL_60')
+        ];
 
-        $normalcustlabel = $normalcustlist->map(fn($r) => $r->recday.'-'.$r->recmonth);
-        $normalcustdata = $normalcustlist->pluck('totaluser');
+        $data = [];
 
-        $normalleadlabel = $normalleadlist->map(fn($r) => $r->recday.'-'.$r->recmonth);
-        $normalleaddata = $normalleadlist->pluck('totaluser');
+        foreach ($charts as $key => $list) {
 
-        $normal36plabel = $normal36plist->map(fn($r) => $r->recday.'-'.$r->recmonth);
-        $normal36pdata = $normal36plist->pluck('totaluser');
+            $list = $list->reverse()->values();
 
-        $normal60plabel = $normal60plist->map(fn($r) => $r->recday.'-'.$r->recmonth);
-        $normal60pdata = $normal60plist->pluck('totaluser');
+            $data[$key.'label'] = $list->map(fn($r) => $r->recday.'-'.$r->recmonth)->toArray();
+            $data[$key.'data']  = $list->pluck('totaluser')->toArray();
+        }
 
-
-        return view('admin.dashboard', compact('normalcustlabel', 'normalcustdata', 'normalleadlabel', 'normalleaddata', 'normal36plabel', 'normal36pdata', 'normal60plabel', 'normal60pdata'));
+        return view('admin.dashboard', $data);
     }
 
     public function tatkalDashboard()
     {
-        $tatkalcustlist = Customer::gettatkalcustdata()->reverse();
-        $tatkalleadlist = Customer::gettatkalleaddata()->reverse();
-        $tatkal36plist = Customer::gettatkal36pdata()->reverse();
-        $tatkal60plist = Customer::gettatkal60pdata()->reverse();
+        $charts = [
+            'tatkalcust' => Customer::getDashboardData('tatkal',1),
+            'tatkallead' => Customer::getDashboardData('tatkal',0),
+            'tatkal36p'  => Customer::getDashboardData(null,1,'TATKAL_36'),
+            'tatkal60p'  => Customer::getDashboardData(null,1,'TATKAL_60')
+        ];
 
-        $tatkalcustlabel = $tatkalcustlist->map(fn($r) => $r->recday.'-'.$r->recmonth);
-        $tatkalcustdata = $tatkalcustlist->pluck('totaluser');
+        $data = [];
 
-        $tatkalleadlabel = $tatkalleadlist->map(fn($r) => $r->recday.'-'.$r->recmonth);
-        $tatkalleaddata = $tatkalleadlist->pluck('totaluser');
+        foreach ($charts as $key => $list) {
 
-        $tatkal36plabel = $tatkal36plist->map(fn($r) => $r->recday.'-'.$r->recmonth);
-        $tatkal36pdata = $tatkal36plist->pluck('totaluser');
+            $list = $list->reverse()->values();
 
-        $tatkal60plabel = $tatkal60plist->map(fn($r) => $r->recday.'-'.$r->recmonth);
-        $tatkal60pdata = $tatkal60plist->pluck('totaluser');
+            $data[$key.'label'] = $list->map(fn($r) => $r->recday.'-'.$r->recmonth)->toArray();
+            $data[$key.'data']  = $list->pluck('totaluser')->toArray();
+        }
 
-        return view('admin.tatkal_dashboard', compact('tatkalcustlabel', 'tatkalcustdata', 'tatkalleadlabel', 'tatkalleaddata', 'tatkal36plabel', 'tatkal36pdata', 'tatkal60plabel', 'tatkal60pdata'));
+        return view('admin.tatkal_dashboard', $data);
     }
 } 

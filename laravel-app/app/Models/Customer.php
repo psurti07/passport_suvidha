@@ -79,121 +79,28 @@ class Customer extends Authenticatable
         return $this->hasMany(ApplicationDocument::class);
     }
 
-    public static function getnormalcustdata()
+    public static function getDashboardData($type = null, $paid = null, $service = null)
     {
-        return DB::table('customers')
+        $query = DB::table('customers')
             ->selectRaw('YEAR(created_at) as recyear,
                         MONTH(created_at) as recmonth,
                         DAY(created_at) as recday,
                         COUNT(id) as totaluser')
-            ->where('passport_type','normal')
-            ->where('is_paid',1)
-            ->groupByRaw('YEAR(created_at), MONTH(created_at), DAY(created_at)')
-            ->orderByRaw('YEAR(created_at) desc, MONTH(created_at) desc, DAY(created_at) desc')
-            ->limit(10)
-            ->get();
-    }
+            ->whereNull('deleted_at');
 
-    public static function getnormalleaddata()
-    {
-        return DB::table('customers')
-            ->selectRaw('YEAR(created_at) as recyear,
-                        MONTH(created_at) as recmonth,
-                        DAY(created_at) as recday,
-                        COUNT(id) as totaluser')
-            ->where('passport_type','normal')
-            ->where('is_paid',0)
-            ->groupByRaw('YEAR(created_at), MONTH(created_at), DAY(created_at)')
-            ->orderByRaw('YEAR(created_at) desc, MONTH(created_at) desc, DAY(created_at) desc')
-            ->limit(10)
-            ->get();
-    }
+        if ($type) {
+            $query->where('passport_type', $type);
+        }
 
-    public static function getnormal36pdata()
-    {
-        return DB::table('customers')
-            ->selectRaw('YEAR(created_at) as recyear,
-                        MONTH(created_at) as recmonth,
-                        DAY(created_at) as recday,
-                        COUNT(id) as totaluser')
-            ->where('service_code','NORMAL_36')
-            ->where('is_paid',1)
-            ->groupByRaw('YEAR(created_at), MONTH(created_at), DAY(created_at)')
-            ->orderByRaw('YEAR(created_at) desc, MONTH(created_at) desc, DAY(created_at) desc')
-            ->limit(10)
-            ->get();
-    }
+        if (!is_null($paid)) {
+            $query->where('is_paid', $paid);
+        }
 
-    public static function getnormal60pdata()
-    {
-        return DB::table('customers')
-            ->selectRaw('YEAR(created_at) as recyear,
-                        MONTH(created_at) as recmonth,
-                        DAY(created_at) as recday,
-                        COUNT(id) as totaluser')
-            ->where('service_code','NORMAL_60')
-            ->where('is_paid',1)
-            ->groupByRaw('YEAR(created_at), MONTH(created_at), DAY(created_at)')
-            ->orderByRaw('YEAR(created_at) desc, MONTH(created_at) desc, DAY(created_at) desc')
-            ->limit(10)
-            ->get();
-    }
+        if ($service) {
+            $query->where('service_code', $service);
+        }
 
-    public static function gettatkalcustdata()
-    {
-        return DB::table('customers')
-            ->selectRaw('YEAR(created_at) as recyear,
-                        MONTH(created_at) as recmonth,
-                        DAY(created_at) as recday,
-                        COUNT(id) as totaluser')
-            ->where('passport_type','tatkal')
-            ->where('is_paid',1)
-            ->groupByRaw('YEAR(created_at), MONTH(created_at), DAY(created_at)')
-            ->orderByRaw('YEAR(created_at) desc, MONTH(created_at) desc, DAY(created_at) desc')
-            ->limit(10)
-            ->get();
-    }
-
-    public static function gettatkalleaddata()
-    {
-        return DB::table('customers')
-            ->selectRaw('YEAR(created_at) as recyear,
-                        MONTH(created_at) as recmonth,
-                        DAY(created_at) as recday,
-                        COUNT(id) as totaluser')
-            ->where('passport_type','tatkal')
-            ->where('is_paid',0)
-            ->groupByRaw('YEAR(created_at), MONTH(created_at), DAY(created_at)')
-            ->orderByRaw('YEAR(created_at) desc, MONTH(created_at) desc, DAY(created_at) desc')
-            ->limit(10)
-            ->get();
-    }
-
-    public static function gettatkal36pdata()
-    {
-        return DB::table('customers')
-            ->selectRaw('YEAR(created_at) as recyear,
-                        MONTH(created_at) as recmonth,
-                        DAY(created_at) as recday,
-                        COUNT(id) as totaluser')
-            ->where('service_code','TATKAL_36')
-            ->where('is_paid',1)
-            ->groupByRaw('YEAR(created_at), MONTH(created_at), DAY(created_at)')
-            ->orderByRaw('YEAR(created_at) desc, MONTH(created_at) desc, DAY(created_at) desc')
-            ->limit(10)
-            ->get();
-    }
-
-    public static function gettatkal60pdata()
-    {
-        return DB::table('customers')
-            ->selectRaw('YEAR(created_at) as recyear,
-                        MONTH(created_at) as recmonth,
-                        DAY(created_at) as recday,
-                        COUNT(id) as totaluser')
-            ->where('service_code','TATKAL_60')
-            ->where('is_paid',1)
-            ->groupByRaw('YEAR(created_at), MONTH(created_at), DAY(created_at)')
+        return $query->groupByRaw('YEAR(created_at), MONTH(created_at), DAY(created_at)')
             ->orderByRaw('YEAR(created_at) desc, MONTH(created_at) desc, DAY(created_at) desc')
             ->limit(10)
             ->get();

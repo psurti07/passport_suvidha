@@ -4,7 +4,8 @@
 <div class="space-y-8">
     <!-- Header -->
     <div class="flex justify-between items-center">
-        <h1 class="text-xl font-semibold text-primary-blue">Passport Application Statistics - {{ now()->format('d M, Y') }}</h1>
+        <h1 class="text-xl font-semibold text-primary-blue">Passport Application Statistics -
+            {{ now()->format('d M, Y') }}</h1>
     </div>
 
     <!-- Statistics Charts -->
@@ -54,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const accentBlue = computedStyle.getPropertyValue('--accent-blue').trim();
     const textGray = computedStyle.getPropertyValue('--text-gray').trim();
     const borderColor = computedStyle.getPropertyValue('--border-color').trim();
-    
+
     // Ensure default values if variables are not defined
     const defaultColor = '#CCCCCC'; // A neutral default color
 
@@ -97,7 +98,7 @@ document.addEventListener('DOMContentLoaded', function() {
             tooltip: {
                 backgroundColor: primaryBlue || defaultColor,
                 titleColor: 'white', // Assuming white text is desired on the primary color
-                bodyColor: 'white',  // Assuming white text is desired on the primary color
+                bodyColor: 'white', // Assuming white text is desired on the primary color
                 padding: 10,
                 cornerRadius: 4,
                 displayColors: false // Hide color box in tooltip
@@ -107,82 +108,56 @@ document.addEventListener('DOMContentLoaded', function() {
         // barThickness: 30 
     };
 
-    const label1 = @json($tatkalcustlabel);
-    const data1 = @json($tatkalcustdata);
-
-    const label2 = @json($tatkalleadlabel);
-    const data2 = @json($tatkalleaddata);
-
-    const label3 = @json($tatkal36plabel);
-    const data3 = @json($tatkal36pdata);
-
-    const label4 = @json($tatkal60plabel);
-    const data4 = @json($tatkal60pdata);
-
-    // Tatkal Passport Customer Registrations Chart
-    const tatkalcustCtx = document.getElementById('tatkalCustChart').getContext('2d');
-    new Chart(tatkalcustCtx, {
-        type: 'bar',
-        data: {
-            labels: label1,
-            datasets: [{
-                label: 'Tatkal Registrations',
-                data: data1, // Example Data
-                backgroundColor: secondaryBlue || defaultColor,
-                borderRadius: 4
-            }]
+    // Chart Data from Controller
+    const charts = [{
+            id: 'tatkalCustChart',
+            label: 'Tatkal Registrations',
+            labels: @json($tatkalcustlabel),
+            data: @json($tatkalcustdata)
         },
-        options: { ...commonOptions } // Spread common options
-    });
-
-    // Tatkal Passport Customer Leads Chart
-    const tatkalleadCtx = document.getElementById('tatkalLeadChart').getContext('2d');
-    new Chart(tatkalleadCtx, {
-        type: 'bar',
-        data: {
-            labels: label2,
-            datasets: [{
-                label: 'Tatkal Leads',
-                data: data2, // Example Data
-                backgroundColor: secondaryBlue || defaultColor,
-                borderRadius: 4
-            }]
+        {
+            id: 'tatkalLeadChart',
+            label: 'Tatkal Leads',
+            labels: @json($tatkalleadlabel),
+            data: @json($tatkalleaddata)
         },
-        options: { ...commonOptions } // Spread common options
-    });
-
-    // Tatkal Passport 36 Page Chart
-    const tatkal36Ctx = document.getElementById('tatkal36Chart').getContext('2d');
-    new Chart(tatkal36Ctx, {
-        type: 'bar',
-        data: {
-            labels: label3,
-            datasets: [{
-                label: 'Tatkal 36p',
-                data: data3, // Example Data
-                backgroundColor: secondaryBlue || defaultColor,
-                borderRadius: 4
-            }]
+        {
+            id: 'tatkal36Chart',
+            label: 'Tatkal 36p',
+            labels: @json($tatkal36plabel),
+            data: @json($tatkal36pdata)
         },
-        options: { ...commonOptions } // Spread common options
-    });
+        {
+            id: 'tatkal60Chart',
+            label: 'Tatkal 60p',
+            labels: @json($tatkal60plabel),
+            data: @json($tatkal60pdata)
+        }
+    ];
 
-    // Tatkal Passport 60 Page Chart
-    const tatkal60Ctx = document.getElementById('tatkal60Chart').getContext('2d');
-    new Chart(tatkal60Ctx, {
-        type: 'bar',
-        data: {
-            labels: label4,
-            datasets: [{
-                label: 'Tatkal 60p',
-                data: data4, // Example Data
-                backgroundColor: secondaryBlue || defaultColor,
-                borderRadius: 4
-            }]
-        },
-        options: { ...commonOptions } 
+    // Create Charts
+    charts.forEach(chart => {
+
+        const ctx = document.getElementById(chart.id).getContext('2d');
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: chart.labels,
+                datasets: [{
+                    label: chart.label,
+                    data: chart.data,
+                    backgroundColor: secondaryBlue,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                ...commonOptions
+            }
+        });
+
     });
 });
 </script>
 @endpush
-@endsection 
+@endsection
