@@ -35,6 +35,7 @@ Auth::routes();
 // Admin Routes
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\AdminController::class, 'dashboard'])->name('dashboard');
+    Route::get('/dashboard/tatkal', [App\Http\Controllers\AdminController::class, 'tatkalDashboard'])->name('dashboard.tatkal');
     Route::get('/todaystatistics', [TodayStatisticsController::class, 'index'])->name('todaystatistics');
     Route::get('users/export', [App\Http\Controllers\Admin\UserController::class, 'export'])->name('users.export');
     Route::resource('users', App\Http\Controllers\Admin\UserController::class);    

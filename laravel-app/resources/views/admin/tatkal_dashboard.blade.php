@@ -9,53 +9,38 @@
 
     <!-- Statistics Charts -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <!-- Normal Passport Customer Registrations -->
+        <!-- Tatkal Passport Customer Registrations -->
         <div class="card p-6">
-            <h2 class="text-lg font-medium text-primary-blue mb-6">Normal Passport - Customer Registrations</h2>
+            <h2 class="text-lg font-medium text-primary-blue mb-6">Tatkal Passport - Customer Registrations</h2>
             <div class="h-[400px]">
-                <canvas id="normalCustChart"></canvas>
+                <canvas id="tatkalCustChart"></canvas>
             </div>
         </div>
 
-        <!-- Normal Passport Customer Leads -->
+        <!-- Tatkal Passport Customer Leads -->
         <div class="card p-6">
-            <h2 class="text-lg font-medium text-primary-blue mb-6">Normal Passport - Customer Leads</h2>
+            <h2 class="text-lg font-medium text-primary-blue mb-6">Tatkal Passport - Customer Leads</h2>
             <div class="h-[400px]">
-                <canvas id="normalLeadChart"></canvas>
-            </div>
-        </div>
-
-        <!-- Normal Passport 36 Page -->
-        <div class="card p-6">
-            <h2 class="text-lg font-medium text-primary-blue mb-6">Normal Passport - 36 Pages</h2>
-            <div class="h-[400px]">
-                <canvas id="normal36Chart"></canvas>
-            </div>
-        </div>
-
-        <!-- Normal Passport 60 Page -->
-        <div class="card p-6">
-            <h2 class="text-lg font-medium text-primary-blue mb-6">Normal Passport - 60 Pages</h2>
-            <div class="h-[400px]">
-                <canvas id="normal60Chart"></canvas>
+                <canvas id="tatkalLeadChart"></canvas>
             </div>
         </div>
 
         <!-- Tatkal Passport 36 Page -->
-        <!-- <div class="card p-6">
+        <div class="card p-6">
             <h2 class="text-lg font-medium text-primary-blue mb-6">Tatkal Passport - 36 Pages</h2>
             <div class="h-[400px]">
                 <canvas id="tatkal36Chart"></canvas>
             </div>
-        </div> -->
+        </div>
 
         <!-- Tatkal Passport 60 Page -->
-        <!-- <div class="card p-6">
+        <div class="card p-6">
             <h2 class="text-lg font-medium text-primary-blue mb-6">Tatkal Passport - 60 Pages</h2>
             <div class="h-[400px]">
                 <canvas id="tatkal60Chart"></canvas>
             </div>
-        </div> -->
+        </div>
+
     </div>
 </div>
 
@@ -122,84 +107,82 @@ document.addEventListener('DOMContentLoaded', function() {
         // barThickness: 30 
     };
 
-    const label1 = @json($normalcustlabel);
-    const data1 = @json($normalcustdata);
+    const label1 = @json($tatkalcustlabel);
+    const data1 = @json($tatkalcustdata);
 
-    const label2 = @json($normalleadlabel);
-    const data2 = @json($normalleaddata);
+    const label2 = @json($tatkalleadlabel);
+    const data2 = @json($tatkalleaddata);
 
-    const label3 = @json($normal36plabel);
-    const data3 = @json($normal36pdata);
+    const label3 = @json($tatkal36plabel);
+    const data3 = @json($tatkal36pdata);
 
-    const label4 = @json($normal60plabel);
-    const data4 = @json($normal60pdata);
+    const label4 = @json($tatkal60plabel);
+    const data4 = @json($tatkal60pdata);
 
-
-    // Normal Passport Customer Registrations Chart
-    const normalcustCtx = document.getElementById('normalCustChart').getContext('2d');
-    new Chart(normalcustCtx, {
+    // Tatkal Passport Customer Registrations Chart
+    const tatkalcustCtx = document.getElementById('tatkalCustChart').getContext('2d');
+    new Chart(tatkalcustCtx, {
         type: 'bar',
         data: {
             labels: label1,
             datasets: [{
-                label: 'Normal Registrations',
+                label: 'Tatkal Registrations',
                 data: data1, // Example Data
-                backgroundColor: primaryBlue || defaultColor,
+                backgroundColor: secondaryBlue || defaultColor,
                 borderRadius: 4
             }]
         },
         options: { ...commonOptions } // Spread common options
     });
 
-    // Normal Passport Customer Leads Chart
-    const normalleadCtx = document.getElementById('normalLeadChart').getContext('2d');
-    new Chart(normalleadCtx, {
+    // Tatkal Passport Customer Leads Chart
+    const tatkalleadCtx = document.getElementById('tatkalLeadChart').getContext('2d');
+    new Chart(tatkalleadCtx, {
         type: 'bar',
         data: {
             labels: label2,
             datasets: [{
-                label: 'Normal Leads',
+                label: 'Tatkal Leads',
                 data: data2, // Example Data
-                backgroundColor: primaryBlue || defaultColor,
+                backgroundColor: secondaryBlue || defaultColor,
                 borderRadius: 4
             }]
         },
         options: { ...commonOptions } // Spread common options
     });
 
-    // Normal Passport 36 Page Chart
-    const normal36Ctx = document.getElementById('normal36Chart').getContext('2d');
-    new Chart(normal36Ctx, {
+    // Tatkal Passport 36 Page Chart
+    const tatkal36Ctx = document.getElementById('tatkal36Chart').getContext('2d');
+    new Chart(tatkal36Ctx, {
         type: 'bar',
         data: {
             labels: label3,
             datasets: [{
-                label: 'Normal 36p',
+                label: 'Tatkal 36p',
                 data: data3, // Example Data
-                backgroundColor: primaryBlue || defaultColor,
+                backgroundColor: secondaryBlue || defaultColor,
                 borderRadius: 4
             }]
         },
         options: { ...commonOptions } // Spread common options
     });
 
-    // Normal Passport 60 Page Chart
-    const normal60Ctx = document.getElementById('normal60Chart').getContext('2d');
-    new Chart(normal60Ctx, {
+    // Tatkal Passport 60 Page Chart
+    const tatkal60Ctx = document.getElementById('tatkal60Chart').getContext('2d');
+    new Chart(tatkal60Ctx, {
         type: 'bar',
         data: {
             labels: label4,
             datasets: [{
-                label: 'Normal 60p',
+                label: 'Tatkal 60p',
                 data: data4, // Example Data
-                backgroundColor: primaryBlue || defaultColor,
+                backgroundColor: secondaryBlue || defaultColor,
                 borderRadius: 4
             }]
         },
         options: { ...commonOptions } 
     });
 });
-
 </script>
 @endpush
 @endsection 
