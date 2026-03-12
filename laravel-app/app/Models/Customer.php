@@ -32,6 +32,8 @@ class Customer extends Authenticatable
         'nationality',
         'payment_info_id',
         'service_code',
+        'passport_type',
+        'book_size',
         'is_paid',
         'registration_step',
     ];
