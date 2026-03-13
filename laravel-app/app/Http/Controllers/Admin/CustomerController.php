@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Customer;
+use App\Models\ApplicationOrder;
+use App\Models\Invoice;
 use Illuminate\Validation\Rule;
 // Imports needed for export
 use App\Exports\CustomersExport;       // We will create this
@@ -12,7 +14,9 @@ use Maatwebsite\Excel\Facades\Excel as ExcelFacade;
 use Maatwebsite\Excel\Excel as ExcelConstant; // Renamed to avoid conflict
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Carbon; // Add Carbon import
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Carbon; 
+use Illuminate\Support\Str;
 
 class CustomerController extends Controller
 {
@@ -168,48 +172,140 @@ class CustomerController extends Controller
      */
     public function store(Request $request)
     {
-        // Validation rules similar to API controller
         $baseRules = [
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'mobile_number' => 'required|string|max:20',
+            'mobile_number' => 'required','regex:/^[6-9][0-9]{9}$/',
             'email' => 'required|email|unique:customers,email',
             'is_paid' => 'sometimes|boolean',
         ];
+
         $paidRules = [
-            'pack_code' => 'required|string|max:255',
             'address' => 'required|string',
+            'pin_code' => 'required|string|max:255',
+            'city' => 'required|string|max:255',
+            'state' => 'required|string|max:255',
             'gender' => 'required|in:male,female,other',
             'date_of_birth' => 'required|date',
             'place_of_birth' => 'required|string|max:255',
             'nationality' => 'required|string|max:255',
-            'payment_info_id' => 'required|numeric',
             'service_code' => 'required|string|max:255',
+            'card_number' => 'nullable|string',
+            'amount' => 'nullable|numeric',
+            'paymentid' => 'nullable|string'
         ];
 
-        $isPaid = $request->boolean('is_paid'); 
+        $isPaid = $request->boolean('is_paid');
 
         $rules = $baseRules;
+
         if ($isPaid) {
             $rules = array_merge($rules, $paidRules);
         }
 
         $validatedData = $request->validate($rules);
-        $validatedData['is_paid'] = $isPaid; // Ensure is_paid is set correctly
 
-         // Fill missing nullable fields with null if not paid
-        if (!$isPaid) {
-             $nullableFields = ['pack_code', 'address', 'gender', 'date_of_birth', 'place_of_birth', 'nationality', 'payment_info_id', 'service_code'];
-             foreach ($nullableFields as $field) {
-                 if (!isset($validatedData[$field])) {
-                     $validatedData[$field] = null;
-                 }
-             }
+        $validatedData['is_paid'] = $isPaid;
+        $validatedData['registration_step'] = $isPaid ? 4 : 1;
+
+        if ($isPaid && isset($validatedData['service_code'])) {
+
+            switch ($validatedData['service_code']) {
+
+                case 'NORMAL_36':
+                    $validatedData['passport_type'] = 'normal';
+                    $validatedData['book_size'] = 36;
+                    break;
+
+                case 'NORMAL_60':
+                    $validatedData['passport_type'] = 'normal';
+                    $validatedData['book_size'] = 60;
+                    break;
+
+                case 'TATKAL_36':
+                    $validatedData['passport_type'] = 'tatkal';
+                    $validatedData['book_size'] = 36;
+                    break;
+
+                case 'TATKAL_60':
+                    $validatedData['passport_type'] = 'tatkal';
+                    $validatedData['book_size'] = 60;
+                    break;
+            }
         }
 
-        Customer::create($validatedData);
+        if (!$isPaid) {
+            $nullableFields = [
+                'address','pin_code','city','state','gender',
+                'date_of_birth','place_of_birth','nationality',
+                'service_code','passport_type','book_size'
+            ];
 
-        return redirect()->route('admin.customers.index')->with('success', 'Customer created successfully');
+            foreach ($nullableFields as $field) {
+                $validatedData[$field] = $validatedData[$field] ?? null;
+            }
+        }
+        
+        DB::transaction(function () use ($validatedData, $isPaid, $request) {
+            $customer = Customer::create($validatedData);
+
+            if ($isPaid) {
+
+                $regDate = Carbon::now()->format('Y-m-d');
+
+                $cardNumber = $request->card_number ?? rand(1000000000000000,9999999999999999);
+
+                $paymentId = $request->paymentid ?? 'cash_' . Str::random(13);
+
+                $netAmount = $request->amount ?? 0;
+
+                $cgstAmount = 0;
+                $sgstAmount = 0;
+                $igstAmount = 0;
+
+                if ($request->state == 'Gujarat') {
+                    $cgstAmount = $netAmount * 0.09;
+                    $sgstAmount = $netAmount * 0.09;
+
+                } else {
+                    $igstAmount = $netAmount * 0.18;
+                }
+
+                $grandTotal = $netAmount + $cgstAmount + $sgstAmount + $igstAmount;
+
+                $order = ApplicationOrder::create([
+                    'customer_id' => $customer->id,
+                    'registration_date' => $regDate,
+                    'expiry_date' => Carbon::parse($regDate)->addMonths(6),
+                    'card_number' => $cardNumber,
+                    'amount' => $grandTotal,
+                    'paymentid' => $paymentId
+                ]);
+
+                $invoiceno = Invoice::max('inv_no') + 1;
+
+                $invoice = Invoice::create([
+                    'customer_id' => $customer->id,
+                    'inv_date' => Carbon::now()->format('Y-m-d'),
+                    'inv_no' => $invoiceno,
+                    'net_amount' => $netAmount,
+                    'cgst' => $cgstAmount,
+                    'sgst' => $sgstAmount,
+                    'igst' => $igstAmount,
+                    'total_amount' => $grandTotal,
+                    'fullname' => $customer->first_name . ' ' . $customer->last_name,
+                    'mobile' => $customer->mobile_number,
+                    'email' => $customer->email,
+                    // 'gst_no' => $customer->email,
+                    'city' => $customer->city,
+                    'state' => $customer->state,
+
+                ]);
+            }
+        });
+        
+        return redirect()->route('admin.customers.index')
+            ->with('success', 'Customer created successfully');
     }
 
     /**
