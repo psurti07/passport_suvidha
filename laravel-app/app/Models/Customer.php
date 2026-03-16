@@ -30,6 +30,7 @@ class Customer extends Authenticatable
         'service_code',
         'passport_type',
         'book_size',
+        'gstno',
         'is_paid',
         'registration_step',
         'created_at',

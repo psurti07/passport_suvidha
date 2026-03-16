@@ -4,19 +4,27 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+
 use App\Models\Customer;
 use App\Models\ApplicationOrder;
 use App\Models\Invoice;
+use App\Models\InvoiceLog;
+
 use Illuminate\Validation\Rule;
-// Imports needed for export
-use App\Exports\CustomersExport;       // We will create this
+
+use App\Exports\CustomersExport;      
 use Maatwebsite\Excel\Facades\Excel as ExcelFacade;
-use Maatwebsite\Excel\Excel as ExcelConstant; // Renamed to avoid conflict
+use Maatwebsite\Excel\Excel as ExcelConstant; 
 use Barryvdh\DomPDF\Facade\Pdf;
+
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+
 use Illuminate\Support\Carbon; 
 use Illuminate\Support\Str;
+
+use Yajra\DataTables\Facades\DataTables;
 
 class CustomerController extends Controller
 {
@@ -25,67 +33,123 @@ class CustomerController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    // public function index(Request $request)
+    // {
+    //     $query = Customer::query();
+
+    //     // Search functionality
+    //     if ($request->filled('search')) {
+    //         $searchTerm = $request->search;
+    //         $query->where(function($q) use ($searchTerm) {
+    //             $q->where('pack_code', 'like', "%{$searchTerm}%")
+    //               ->orWhere('first_name', 'like', "%{$searchTerm}%")
+    //               ->orWhere('last_name', 'like', "%{$searchTerm}%")
+    //               ->orWhere('email', 'like', "%{$searchTerm}%")
+    //               ->orWhere('mobile_number', 'like', "%{$searchTerm}%")
+    //               ->orWhere('service_code', 'like', "%{$searchTerm}%");
+    //         });
+    //     }
+
+    //     // Date range filtering
+    //     if ($request->filled('from_date')) {
+    //         $query->whereDate('created_at', '>=', $request->from_date);
+    //     }
+    //     if ($request->filled('to_date')) {
+    //         $query->whereDate('created_at', '<=', $request->to_date);
+    //     }
+
+    //     // Filter by is_paid status
+    //     if ($request->filled('status')) { // Use filled() for cleaner check
+    //         $status = $request->input('status');
+    //         if ($status === 'paid') {
+    //             $query->where('is_paid', true);
+    //         } elseif ($status === 'lead') {
+    //             $query->where('is_paid', false);
+    //         }
+    //          // No 'else' needed, as filled() handles the 'All' case (empty value)
+    //     }
+
+    //     // Sorting logic
+    //     $sortBy = $request->input('sort_by', 'id'); // Default sort column
+    //     $sortDirection = $request->input('sort_direction', 'desc'); // Default sort direction
+
+    //     // Validate sortable columns to prevent errors
+    //     $sortableColumns = ['id', 'first_name', 'email', 'mobile_number', 'is_paid', 'created_at'];
+    //     if (in_array($sortBy, $sortableColumns)) {
+    //          // Combine first_name and last_name sorting if 'first_name' is chosen
+    //          if ($sortBy === 'first_name') {
+    //              $query->orderBy('first_name', $sortDirection)
+    //                    ->orderBy('last_name', $sortDirection); // Secondary sort by last name
+    //          } else {
+    //             $query->orderBy($sortBy, $sortDirection);
+    //          }
+    //     } else {
+    //         // Default sort if invalid column provided
+    //         $query->orderBy('id', 'desc');
+    //     }
+
+    //     // Apply pagination and append query string parameters
+    //     $perPage = $request->input('per_page', 10); // Get per_page value from request
+    //     $paginator = $query->paginate($perPage);
+    //     $customers = $paginator->withQueryString(); // Chain withQueryString directly
+
+    //     return view('admin.customers.index-old', compact('customers'));
+    // }
+
+    public function index()
     {
-        $query = Customer::query();
+        return view('admin.customers.index');
+    }
 
-        // Search functionality
-        if ($request->filled('search')) {
-            $searchTerm = $request->search;
-            $query->where(function($q) use ($searchTerm) {
-                $q->where('pack_code', 'like', "%{$searchTerm}%")
-                  ->orWhere('first_name', 'like', "%{$searchTerm}%")
-                  ->orWhere('last_name', 'like', "%{$searchTerm}%")
-                  ->orWhere('email', 'like', "%{$searchTerm}%")
-                  ->orWhere('mobile_number', 'like', "%{$searchTerm}%")
-                  ->orWhere('service_code', 'like', "%{$searchTerm}%");
-            });
+    public function data(Request $request)
+    {
+        $query = Customer::select([
+            'id',
+            'first_name',
+            'last_name',
+            'email',
+            'mobile_number',
+            'is_paid',
+            'created_at'
+        ]);
+
+        // Date Filter
+        if ($request->from_date && $request->to_date) {
+
+            $query->whereBetween('created_at', [
+                $request->from_date,
+                $request->to_date
+            ]);
         }
 
-        // Date range filtering
-        if ($request->filled('from_date')) {
-            $query->whereDate('created_at', '>=', $request->from_date);
-        }
-        if ($request->filled('to_date')) {
-            $query->whereDate('created_at', '<=', $request->to_date);
+        // Status Filter
+        if ($request->status == "paid") {
+            $query->where('is_paid', 1);
         }
 
-        // Filter by is_paid status
-        if ($request->filled('status')) { // Use filled() for cleaner check
-            $status = $request->input('status');
-            if ($status === 'paid') {
-                $query->where('is_paid', true);
-            } elseif ($status === 'lead') {
-                $query->where('is_paid', false);
-            }
-             // No 'else' needed, as filled() handles the 'All' case (empty value)
+        if ($request->status == "lead") {
+            $query->where('is_paid', 0);
         }
 
-        // Sorting logic
-        $sortBy = $request->input('sort_by', 'id'); // Default sort column
-        $sortDirection = $request->input('sort_direction', 'desc'); // Default sort direction
+        return DataTables::of($query)
 
-        // Validate sortable columns to prevent errors
-        $sortableColumns = ['id', 'first_name', 'email', 'mobile_number', 'is_paid', 'created_at'];
-        if (in_array($sortBy, $sortableColumns)) {
-             // Combine first_name and last_name sorting if 'first_name' is chosen
-             if ($sortBy === 'first_name') {
-                 $query->orderBy('first_name', $sortDirection)
-                       ->orderBy('last_name', $sortDirection); // Secondary sort by last name
-             } else {
-                $query->orderBy($sortBy, $sortDirection);
-             }
-        } else {
-            // Default sort if invalid column provided
-            $query->orderBy('id', 'desc');
-        }
+            ->addIndexColumn()
 
-        // Apply pagination and append query string parameters
-        $perPage = $request->input('per_page', 10); // Get per_page value from request
-        $paginator = $query->paginate($perPage);
-        $customers = $paginator->withQueryString(); // Chain withQueryString directly
+            ->addColumn('name', function ($row) {
+                return $row->first_name . ' ' . $row->last_name;
+            })
 
-        return view('admin.customers.index', compact('customers'));
+            ->addColumn('status', function ($row) {
+                return $row->is_paid ? 'paid' : 'lead';
+            })
+
+            ->editColumn('created_at', function ($row) {
+                return $row->created_at->format('d/m/Y H:i:s');
+            })
+
+            ->rawColumns(['status'])
+
+            ->make(true);
     }
 
     /**
@@ -233,20 +297,9 @@ class CustomerController extends Controller
                     break;
             }
         }
-
-        if (!$isPaid) {
-            $nullableFields = [
-                'address','pin_code','city','state','gender',
-                'date_of_birth','place_of_birth','nationality',
-                'service_code','passport_type','book_size'
-            ];
-
-            foreach ($nullableFields as $field) {
-                $validatedData[$field] = $validatedData[$field] ?? null;
-            }
-        }
         
         DB::transaction(function () use ($validatedData, $isPaid, $request) {
+            
             $customer = Customer::create($validatedData);
 
             if ($isPaid) {
@@ -286,20 +339,21 @@ class CustomerController extends Controller
 
                 $invoice = Invoice::create([
                     'customer_id' => $customer->id,
+                    'card_id' => $order->id,
                     'inv_date' => Carbon::now()->format('Y-m-d'),
                     'inv_no' => $invoiceno,
                     'net_amount' => $netAmount,
                     'cgst' => $cgstAmount,
                     'sgst' => $sgstAmount,
                     'igst' => $igstAmount,
-                    'total_amount' => $grandTotal,
-                    'fullname' => $customer->first_name . ' ' . $customer->last_name,
-                    'mobile' => $customer->mobile_number,
-                    'email' => $customer->email,
-                    // 'gst_no' => $customer->email,
-                    'city' => $customer->city,
-                    'state' => $customer->state,
+                    'total_amount' => $grandTotal
+                ]);
 
+                InvoiceLog::create([
+                    'log_detail' => 'Create New Customer',
+                    'card_number' => $order->id,
+                    'invoice_id' => $invoice->id,
+                    'staff_id' => Auth::id()
                 ]);
             }
         });

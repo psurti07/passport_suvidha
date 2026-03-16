@@ -5,16 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ApplicationOrder extends Model
+class InvoiceLog extends Model
 {
     use HasFactory;
-        
+
     protected $fillable = [
-        'customer_id',
-        'registration_date',
-        'expiry_date',
+        'log_detail',
         'card_number',
-        'amount',
-        'paymentid'
+        'invoice_id',
+        'staff_id'
     ];
 }

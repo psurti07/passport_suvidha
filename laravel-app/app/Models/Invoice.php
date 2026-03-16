@@ -11,19 +11,14 @@ class Invoice extends Model
 
     protected $fillable = [
         'customer_id',
+        'card_id',
         'inv_date',
         'inv_no',
         'net_amount',
         'cgst',
         'sgst',
         'igst',
-        'total_amount',
-        'fullname',
-        'mobile',
-        'email',
-        'gst_no',
-        'city',
-        'state',
+        'total_amount'
     ];
 
     protected $casts = [
@@ -34,6 +29,4 @@ class Invoice extends Model
         'igst' => 'decimal:2',
         'total_amount' => 'decimal:2',
     ];
-
-    protected $table = 'invoice';
 }

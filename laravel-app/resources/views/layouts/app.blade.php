@@ -23,6 +23,11 @@
     <!-- Styles -->
     <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+
+    <!-- Datatable -->
+    <link rel="stylesheet" href="{{ asset('vendor/datatables/css/jquery.dataTables.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('vendor/datatables/css/buttons.dataTables.min.css') }}">
+
     <!-- Alpine.js -->
     <script defer src="https://unpkg.com/alpinejs@3.12.0/dist/cdn.min.js"></script>
     <style>
@@ -1046,6 +1051,15 @@
             </nav>
         </aside>
     </div>
+
+    <script src="{{ asset('vendor/datatables/js/jquery.min.js') }}"></script>
+    <script src="{{ asset('vendor/datatables/js/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ asset('vendor/datatables/js/dataTables.buttons.min.js') }}"></script>
+    <script src="{{ asset('vendor/datatables/js/buttons.html5.min.js') }}"></script>
+    <script src="{{ asset('vendor/datatables/js/buttons.print.min.js') }}"></script>
+    <script src="{{ asset('vendor/datatables/js/jszip.min.js') }}"></script>
+    <script src="{{ asset('vendor/datatables/js/pdfmake.min.js') }}"></script>
+    <script src="{{ asset('vendor/datatables/js/vfs_fonts.js') }}"></script>
 
     @stack('scripts')
 </body>
